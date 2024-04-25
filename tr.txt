@@ -1,0 +1,231 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+using namespace std;
+
+struct Point {
+    float x, y, z;
+
+    Point(float x, float y, float z) : x(x), y(y), z(z) {}
+};
+
+vector<Point> applyTransformation(const std::vector<Point>& points, const std::vector<std::vector<float>>& transformation) {
+    vector<Point> transformedPoints;
+    for (const auto& point : points) {
+        float x = point.x * transformation[0][0] + point.y * transformation[0][1] + point.z * transformation[0][2] + transformation[0][3];
+        float y = point.x * transformation[1][0] + point.y * transformation[1][1] + point.z * transformation[1][2] + transformation[1][3];
+        float z = point.x * transformation[2][0] + point.y * transformation[2][1] + point.z * transformation[2][2] + transformation[2][3];
+        transformedPoints.emplace_back(x, y, z);
+    }
+    return transformedPoints;
+}
+0
+vector<vector<float>> rotationMatrix(char axis, float angle) {
+    angle = angle * M_PI / 180.0f;
+    float cosAngle = cos(angle);
+    float sinAngle = sin(angle);
+    vector<vector<float>> rotation;
+    if (axis == 'x' || axis == 'X') {
+        rotation = {
+            {1, 0, 0, 0},
+            {0, cosAngle, -sinAngle, 0},
+            {0, sinAngle, cosAngle, 0},
+            {0, 0, 0, 1}
+        };
+    } else if (axis == 'y' || axis == 'Y') {
+        rotation = {
+            {cosAngle, 0, sinAngle, 0},
+            {0, 1, 0, 0},
+            {-sinAngle, 0, cosAngle, 0},
+            {0, 0, 0, 1}
+        };
+    } else if (axis == 'z' || axis == 'Z') {
+        rotation = {
+            {cosAngle, -sinAngle, 0, 0},
+            {sinAngle, cosAngle, 0, 0},
+            {0, 0, 1, 0},
+            {0, 0, 0, 1}
+        };
+    } else {
+        cout << "Invalid axis!\n";
+    }
+    return rotation;
+}
+
+int main() {
+    int numVertices;
+    cout << "How many vertices your 3D object has?: ";
+    cin >> numVertices;
+
+    vector<Point> objectPoints;
+    cout << "Enter the coordinates of the vertices:\n";
+    for (int i = 0; i < numVertices; ++i) {
+        float x, y, z;
+        std::cout << "Vertex " << (i + 1) << ": ";
+        std::cin >> x >> y >> z;
+        objectPoints.emplace_back(x, y, z);
+    }
+
+    vector<vector<float>> transformationMatrix(4, vector<float>(4, 0.0f));
+
+    char choice;
+    do {
+        cout << "Which transformation you want? (T: Translation, R: Rotation, S: Scaling): ";
+        cin >> choice;
+
+        switch (choice) {
+            case 'T': {
+                float tx, ty, tz;
+                cout << "Enter translation vector (tx ty tz): ";
+                cin >> tx >> ty >> tz;
+                transformationMatrix = {
+                    {1, 0, 0, tx},
+                    {0, 1, 0, ty},
+                    {0, 0, 1, tz},
+                    {0, 0, 0, 1}
+                };
+                break;
+            }
+            case 'R': {
+                char axis;
+                float angle;
+                cout << "Enter rotation axis (X, Y, Z): ";
+                cin >> axis;
+                cout << "Enter rotation angle (in degrees): ";
+                cin >> angle;
+                transformationMatrix = rotationMatrix(axis, angle);
+                break;
+            }
+            case 'S': {
+                float sx, sy, sz;
+                cout << "Enter scaling factors (Sx Sy Sz): ";
+                cin >> sx >> sy >> sz;
+                transformationMatrix = {
+                    {sx, 0, 0, 0},
+                    {0, sy, 0, 0},
+                    {0, 0, sz, 0},
+                    {0, 0, 0, 1}
+                };
+                break;
+            }
+            default:
+                cout << "Invalid input!\n";
+        }
+
+        objectPoints = applyTransformation(objectPoints, transformationMatrix);
+
+        cout << "Transformed Object Points:\n";
+        for (const auto& point : objectPoints) {
+            cout << "(" << point.x << ", " << point.y << ", " << point.z << ")\n";
+        }
+
+        cout << "Do you wish to continue transformation? (Y/N): ";
+        cin >> choice;
+    } while (choice == 'Y' || choice == 'y');
+
+ return 0;
+}
+
+
+
+
+////////////////////
+
+
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+struct Point {
+    float x, y;
+
+    Point(float x, float y) : x(x), y(y) {}
+};
+
+std::vector<Point> applyTransformation(const std::vector<Point>& points, const std::vector<std::vector<float>>& transformation) {
+    std::vector<Point> transformedPoints;
+    for (const auto& point : points) {
+        float x = point.x * transformation[0][0] + point.y * transformation[0][1] + transformation[0][2];
+        float y = point.x * transformation[1][0] + point.y * transformation[1][1] + transformation[1][2];
+        transformedPoints.emplace_back(x, y);
+    }
+    return transformedPoints;
+}
+
+int main() {
+    int numSides;
+    std::cout << "Enter the number of sides of the polygon: ";
+    std::cin >> numSides;
+
+    std::vector<Point> polygonPoints;
+    std::cout << "Enter the coordinates of the polygon vertices:\n";
+    for (int i = 0; i < numSides; ++i) {
+        float x, y;
+        std::cout << "Vertex " << (i + 1) << ": ";
+        std::cin >> x >> y;
+        polygonPoints.emplace_back(x, y);
+    }
+
+    std::vector<std::vector<float>> transformationMatrix(3, std::vector<float>(3, 0.0f));
+
+    char choice;
+    do {
+        std::cout << "Choose transformation (T: Translation, R: Rotation, S: Scaling): ";
+        std::cin >> choice;
+
+        switch (choice) {
+            case 'T': {
+                float tx, ty;
+                std::cout << "Enter translation vector (tx ty): ";
+                std::cin >> tx >> ty;
+                transformationMatrix = {
+                    {1, 0, tx},
+                    {0, 1, ty},
+                    {0, 0, 1}
+                };
+                break;
+            }
+            case 'R': {
+                float angle;
+                std::cout << "Enter rotation angle (in degrees): ";
+                std::cin >> angle;
+                angle = angle * M_PI / 180.0f;
+                float cosAngle = cos(angle);
+                float sinAngle = sin(angle);
+                transformationMatrix = {
+                    {static_cast<float>(cosAngle), static_cast<float>(-sinAngle), 0},
+                    {static_cast<float>(sinAngle), static_cast<float>(cosAngle), 0},
+                    {0, 0, 1}
+                };
+                break;
+            }
+            case 'S': {
+                float sx, sy;
+                std::cout << "Enter scaling factors (sx sy): ";
+                std::cin >> sx >> sy;
+                transformationMatrix = {
+                    {sx, 0, 0},
+                    {0, sy, 0},
+                    {0, 0, 1}
+                };
+                break;
+            }
+            default:
+                std::cout << "Invalid choice!\n";
+        }
+
+        polygonPoints = applyTransformation(polygonPoints, transformationMatrix);
+
+        std::cout << "Transformed Polygon Points:\n";
+        for (const auto& point : polygonPoints) {
+            std::cout << "(" << point.x << ", " << point.y << ")\n";
+        }
+
+        std::cout << "Continue transformations? (Y/N): ";
+        std::cin >> choice;
+    } while (choice == 'Y' || choice == 'y');
+
+ return 0;
+}
